@@ -18,6 +18,17 @@ def loadDatabaseSettings(pathjs):
     return sjson
 
 
+def hashPassword(password, salt=None):
+    salt = salt or secrets.token_hex(16)
+    h = hashlib.pbkdf2_hmac('sha256', password.encode(), salt.encode(), 200000).hex()
+    return f"{salt}${h}"
+
+
+def checkPassword(password, stored):
+    salt = stored.split('$')[0]
+    return hmac.compare_digest(hashPassword(password, salt), stored)
+
+
 def getToken():
     tiempo = datetime.now().timestamp()
     numero = random.random()
@@ -50,7 +61,7 @@ def Registro():
     R = False
     try:
         with db.cursor() as cursor:
-            cursor.execute('insert into Usuario values(null,%s,%s,md5(%s))', (request.json["uname"], request.json["email"], request.json["password"]))
+            cursor.execute('insert into Usuario values(null,%s,%s,%s)', (request.json["uname"], request.json["email"], hashPassword(request.json["password"])))
             R = cursor.lastrowid
             db.commit()
         db.close()
@@ -77,7 +88,7 @@ def Login():
     R = False
     try:
         with db.cursor() as cursor:
-            cursor.execute('select id from Usuario where uname=%s and password=md5(%s)', (request.json["uname"], request.json["password"]))
+            cursor.execute('select id, password from Usuario where uname=%s', (request.json["uname"],))
             R = cursor.fetchall()
     except Exception as e:
         print(e)
