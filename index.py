@@ -1,4 +1,5 @@
 import json
+import re
 import random
 import hashlib
 import mysql.connector
@@ -47,6 +48,10 @@ def Registro():
     R = 'uname' in request.json and 'email' in request.json and 'password' in request.json
     if not R:
         return {"R": -1}
+    if not all(str(request.json[k]).strip() for k in ('uname', 'email', 'password')):
+        return {"R": -1}
+    if not re.fullmatch(r'[^@\s]+@[^@\s]+\.[^@\s]+', str(request.json['email'])):
+        return {"R": -1}
     R = False
     try:
         with db.cursor() as cursor:
@@ -73,6 +78,8 @@ def Login():
         return {"R": -1}
     R = 'uname' in request.json and 'password' in request.json
     if not R:
+        return {"R": -1}
+    if not str(request.json['uname']).strip() or not str(request.json['password']).strip():
         return {"R": -1}
     R = False
     try:
