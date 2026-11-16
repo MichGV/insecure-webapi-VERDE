@@ -141,7 +141,7 @@ def Imagen():
     R = False
     try:
         with db.cursor() as cursor:
-            cursor.execute('select id_Usuario from AccesoToken where token = %s', (TKN,))
+            cursor.execute('select id_Usuario from AccesoToken where token = %s and fecha > now() - interval 1 hour', (TKN,))
             R = cursor.fetchall()
     except Exception as e:
         print(e)
@@ -194,7 +194,7 @@ def Descargar():
     R = False
     try:
         with db.cursor() as cursor:
-            cursor.execute('select id_Usuario from AccesoToken where token = %s', (TKN,))
+            cursor.execute('select id_Usuario from AccesoToken where token = %s and fecha > now() - interval 1 hour', (TKN,))
             R = cursor.fetchall()
     except Exception as e:
         print(e)
