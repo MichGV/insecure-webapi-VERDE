@@ -89,9 +89,6 @@ def Login():
         return {"R": -3}
 
     T = getToken()
-    with open("/tmp/log", "a") as log:
-        log.write(f'Delete from AccesoToken where id_Usuario = "{R[0][0]}"\n')
-        log.write(f'insert into AccesoToken values({R[0][0]},"{T}",now())\n')
 
     try:
         with db.cursor() as cursor:
@@ -217,4 +214,4 @@ def Descargar():
 
 
 if __name__ == '__main__':
-    run(host='localhost', port=8080, debug=True)
+    run(host='localhost', port=8080, debug=False)
