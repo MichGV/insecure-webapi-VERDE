@@ -120,6 +120,9 @@ def Imagen():
     R = 'name' in request.json and 'data' in request.json and 'ext' in request.json and 'token' in request.json
     if not R:
         return {"R": -1}
+    ext = str(request.json['ext']).lower()
+    if ext not in ('png', 'jpg', 'jpeg', 'gif'):
+        return {"R": -1}
 
     dbcnf = loadDatabaseSettings('db.json')
     db = mysql.connector.connect(
@@ -141,6 +144,10 @@ def Imagen():
         db.close()
         return {"R": -2}
 
+    if not R:
+        db.close()
+        return {"R": -2}
+
     id_Usuario = R[0][0]
     with open(f'tmp/{id_Usuario}', "wb") as imagen:
         imagen.write(base64.b64decode(request.json['data'].encode()))
@@ -151,9 +158,9 @@ def Imagen():
             cursor.execute('select max(id) as idImagen from Imagen where id_Usuario = '+str(id_Usuario))
             R = cursor.fetchall()
             idImagen = R[0][0]
-            cursor.execute('update Imagen set ruta = "img/'+str(idImagen)+'.'+str(request.json['ext'])+'" where id = '+str(idImagen))
+            cursor.execute('update Imagen set ruta = "img/'+str(idImagen)+'.'+ext+'" where id = '+str(idImagen))
             db.commit()
-            shutil.move('tmp/'+str(id_Usuario), 'img/'+str(idImagen)+'.'+str(request.json['ext']))
+            shutil.move('tmp/'+str(id_Usuario), 'img/'+str(idImagen)+'.'+ext)
             return {"R": 0, "D": idImagen}
     except Exception as e:
         print(e)
