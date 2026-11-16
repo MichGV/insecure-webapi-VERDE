@@ -197,15 +197,22 @@ def Descargar():
         db.close()
         return {"R": -2}
 
+    if not R:
+        db.close()
+        return {"R": -2}
+    id_Usuario = R[0][0]
+
     try:
         with db.cursor() as cursor:
-            cursor.execute('Select name,ruta from Imagen where id = %s', (idImagen,))
+            cursor.execute('Select name,ruta from Imagen where id = %s and id_Usuario = %s', (idImagen, id_Usuario))
             R = cursor.fetchall()
     except Exception as e:
         print(e)
         db.close()
         return {"R": -3}
-    print(Path("img").resolve(), R[0][1])
+    db.close()
+    if not R:
+        return {"R": -3}
     return static_file(R[0][1], Path(".").resolve())
 
 
